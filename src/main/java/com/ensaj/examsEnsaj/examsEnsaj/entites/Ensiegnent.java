@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 public class Ensiegnent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_enseignant")
     private int idEnseignant;
     @Column(name = "nom", nullable = false)
     private String nom;
@@ -17,7 +18,7 @@ public class Ensiegnent {
     @Column(name = "disponibilite", nullable = false)
     private String disponibilite;
 
-    @ManyToOne
+    @ManyToMany
     @JoinColumn(name = "id_departement", referencedColumnName = "id")
     private Departement departement;
 
