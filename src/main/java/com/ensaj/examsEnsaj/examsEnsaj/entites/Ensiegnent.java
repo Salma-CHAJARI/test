@@ -1,7 +1,13 @@
 package com.ensaj.examsEnsaj.examsEnsaj.entites;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Data
+@Getter
+@Setter
 public class Ensiegnent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

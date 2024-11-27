@@ -4,10 +4,14 @@ package com.ensaj.examsEnsaj.examsEnsaj.entites;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Data
 @Table(name = "locals")
+@Getter
+@Setter
 public class Local {
 
     @Id

@@ -1,11 +1,17 @@
 package com.ensaj.examsEnsaj.examsEnsaj.entites;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @SuppressWarnings("ALL")
 @Entity
+@Getter
+@Setter
 public class Exam {
 
     @Id

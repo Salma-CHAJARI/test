@@ -1,9 +1,15 @@
 package com.ensaj.examsEnsaj.examsEnsaj.entites;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "admins")
+@Data
+@Getter
+@Setter
 public class Admin {
 
 
