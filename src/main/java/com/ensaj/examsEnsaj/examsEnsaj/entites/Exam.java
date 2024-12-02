@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @SuppressWarnings("ALL")
 @Entity
@@ -25,7 +26,7 @@ public class Exam {
     private String nomModule;
 
     @ManyToOne
-    @JoinColumn(name = "id_department", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "id_department", nullable = false)
     private Departement department;
 
     @Column(name = "nbr_etudiants")
@@ -37,11 +38,19 @@ public class Exam {
     @Column(name = "heure_exam")
     private String  heureExam;
 
-    @ManyToMany
-    @JoinColumn(name = "id_enseignant", referencedColumnName = "id", nullable = false)
-    private Ensiegnent enseignant;
-
-    @OneToMany
-    @JoinColumn(name = "local_id_local")
+    @ManyToOne
+    @JoinColumn(name = "id_local")
     private Local local;
+
+    @ManyToMany
+    @JoinTable(
+            name = "exam_enseignants",
+            joinColumns = @JoinColumn(name = "exam_id"),
+            inverseJoinColumns = @JoinColumn(name = "enseignant_id")
+    )
+    private List<Ensiegnent> enseignants;
+
+
+
+
 }

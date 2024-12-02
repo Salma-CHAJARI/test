@@ -5,9 +5,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
+@Entity
 public class Ensiegnent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,9 +27,7 @@ public class Ensiegnent {
     @Column(name = "disponibilite", nullable = false)
     private String disponibilite;
 
-    @ManyToMany
-    @JoinColumn(name = "id_departement", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "id_departement")
     private Departement departement;
-
-
 }

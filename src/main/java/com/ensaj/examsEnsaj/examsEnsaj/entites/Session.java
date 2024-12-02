@@ -15,7 +15,7 @@ public class Session {
     @Column(name = "id_session")
     private int idSession;
     @ManyToOne
-    @JoinColumn(name = "id_admin", referencedColumnName = "id_admin", nullable = false) // Clé étrangère
+    @JoinColumn(name = "id_admin")
     private Admin admin;
     @Column(name = "type", nullable = false)
     private String type;

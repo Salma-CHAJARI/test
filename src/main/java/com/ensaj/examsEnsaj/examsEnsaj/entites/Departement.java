@@ -17,10 +17,11 @@ public class Departement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_departement")
     private int idDepartement;
-    @ManyToOne
-    @JoinColumn(name = "id_session", referencedColumnName = "id_session", nullable = false)
-    private Session session;
+
     @Column(name = "nom_departement", nullable = false)
     private String nomDepartement;
 
+    @ManyToOne
+    @JoinColumn(name = "id_session")
+    private Session session;
 }
