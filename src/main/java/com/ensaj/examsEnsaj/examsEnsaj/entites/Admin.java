@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class Admin {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,5 +22,6 @@ public class Admin {
     private String email;
     @Column(nullable = false)
     private String password;
+
 
 }

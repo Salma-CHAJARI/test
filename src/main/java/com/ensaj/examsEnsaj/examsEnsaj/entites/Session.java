@@ -21,20 +21,17 @@ public class Session {
     private String type;
     @Column(name = "date_debut", nullable = false)
     private String dateDebut;
-
     @Column(name = "date_fin", nullable = false)
-    private LocalDate dateFin;
+    private String dateFin;
     @Column(name = "heure_matin_debut")
     private String  heureMatinDebut;
-
     @Column(name = "heure_matin_fin")
     private String  heureMatinFin;
-
     @Column(name = "heure_soir_debut")
     private String  heureSoirDebut;
-
     @Column(name = "heure_soir_fin")
     private String heureSoirFin;
+
 }
 
 

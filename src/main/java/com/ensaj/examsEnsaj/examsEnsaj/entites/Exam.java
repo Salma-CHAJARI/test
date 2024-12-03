@@ -29,11 +29,14 @@ public class Exam {
     @JoinColumn(name = "id_department", nullable = false)
     private Departement department;
 
+
     @Column(name = "nbr_etudiants")
     private int nbrEtudiants;
 
+
     @Column(name = "date_exam")
     private LocalDate dateExam;
+
 
     @Column(name = "heure_exam")
     private String  heureExam;

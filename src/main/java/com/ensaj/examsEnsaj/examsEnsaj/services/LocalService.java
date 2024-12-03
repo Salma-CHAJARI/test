@@ -37,6 +37,7 @@ public class LocalService {
             return null;
         }
     }
+
     public boolean deleteLocal(int id) {
         if (localRepository.existsById(id)) {
             localRepository.deleteById(id);
