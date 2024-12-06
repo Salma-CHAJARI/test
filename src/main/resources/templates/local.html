@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Locaux</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        /* Global Styles */
+        body {
+            background: linear-gradient(to right, #eef2f3, #f5f7fa);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(to right, #673ab7, #512da8);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Container and Table Styles */
+        .container {
+            margin-top: 30px;
+        }
+        .table-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.5s ease-out;
+        }
+        .table th {
+            background: #673ab7;
+            color: white;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        .table td {
+            vertical-align: middle;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        /* Badges for type */
+        .badge-amphi {
+            background: linear-gradient(to right, #7b1fa2, #ab47bc);
+            padding: 5px 15px;
+            border-radius: 15px;
+            color: white;
+            font-size: 0.85rem;
+        }
+        .badge-salle {
+            background: linear-gradient(to right, #2196f3, #42a5f5);
+            padding: 5px 15px;
+            border-radius: 15px;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #512da8, #673ab7);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(103, 58, 183, 0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #d32f2f, #e53935);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(211, 47, 47, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal-header {
+            background: linear-gradient(to right, #512da8, #673ab7);
+            color: white;
+            border-bottom: none;
+        }
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <script>
+        function openFormModal() {
+            document.getElementById("formModalLabel").innerText = "Ajouter un Local";
+            document.getElementById("formSubmitButton").innerText = "Enregistrer";
+            document.getElementById("formAction").setAttribute("action", "/locals/save");
+            document.getElementById("nom").value = "";
+            document.getElementById("taille").value = "";
+            document.getElementById("type").value = "";
+            var myModal = new bootstrap.Modal(document.getElementById('formModal'));
+            myModal.show();
+        }
+
+        function openEditModal(element) {
+            const id = element.getAttribute("data-id");
+            const nom = element.getAttribute("data-nom");
+            const taille = element.getAttribute("data-taille");
+            const type = element.getAttribute("data-type");
+
+            document.getElementById("formModalLabel").innerText = "Modifier un Local";
+            document.getElementById("formSubmitButton").innerText = "Modifier";
+            document.getElementById("formAction").setAttribute("action", "/locals/update/" + id);
+
+            document.getElementById("nom").value = nom;
+            document.getElementById("taille").value = taille;
+            document.getElementById("type").value = type;
+
+            var myModal = new bootstrap.Modal(document.getElementById('formModal'));
+            myModal.show();
+        }
+
+        function confirmDelete(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce local ?")) {
+                window.location.href = "/locals/delete/" + id;
+            }
+        }
+    </script>
+</head>
+<body>
+<header class="header">
+    <h1>Gestion des Locaux</h1>
+</header>
+
+<div class="container fade-in">
+    <!-- Actions Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-primary" onclick="openFormModal()">
+            <i class="bi bi-plus-circle"></i> Ajouter un Local
+        </button>
+        <form action="/locals/import" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+            <input type="file" name="file" id="file" accept=".csv, .xlsx" class="form-control me-3" required />
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-upload"></i> Importer
+            </button>
+        </form>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container">
+        <table class="table table-hover text-center">
+            <thead>
+            <tr>
+
+                <th>Nom</th>
+                <th>Taille</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="local : ${locals}">
+
+                <td th:text="${local.nom}"></td>
+                <td th:text="${local.taille}"></td>
+                <td>
+                    <span th:classappend="'badge ' + (${local.type} == 'Amphi' ? 'badge-amphi' : 'badge-salle')" th:text="${local.type}"></span>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm" title="Modifier"
+                            th:data-id="${local.idLocal}"
+                            th:data-nom="${local.nom}"
+                            th:data-taille="${local.taille}"
+                            th:data-type="${local.type}"
+                            onclick="openEditModal(this)">
+                        <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" title="Supprimer"
+                            th:onclick="|confirmDelete(${local.idLocal})|">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel">Ajouter un Local</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAction" method="post">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom :</label>
+                        <input type="text" id="nom" name="nom" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="taille" class="form-label">Taille :</label>
+                        <input type="number" id="taille" name="taille" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type :</label>
+                        <select id="type" name="type" class="form-select" required>
+                            <option value="" disabled selected>Choisir un type</option>
+                            <option value="Amphi">Amphi</option>
+                            <option value="Salle">Salle</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="formSubmitButton" class="btn btn-primary w-100">
+                        Enregistrer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

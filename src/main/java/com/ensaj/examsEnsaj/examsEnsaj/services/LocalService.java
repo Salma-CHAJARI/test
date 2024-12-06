@@ -46,4 +46,15 @@ public class LocalService {
             return false;
         }
     }
+    public void saveAll(List<Local> locaux) {
+        localRepository.saveAll(locaux);
+    }
+
+    public void updateLocal(Local local) {
+        localRepository.save(local);
+    }
+
+    public boolean existsByNomAndTailleAndType(String nom, double taille, String type) {
+        return localRepository.existsByNomAndTailleAndType(nom, taille, type);
+    }
 }
