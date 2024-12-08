@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -47,6 +45,18 @@ public class SessionController {
 
         model.addAttribute("error", "Échec de la création de la session.");
         return "home";
+    }
+    @GetMapping("/selectSession/{id}")
+    public String selectSession(@PathVariable int id, HttpSession httpSession) {
+        Session selectedSession = sessionService.getSessionById(id);
+
+        if (selectedSession != null) {
+            // Stocker la session sélectionnée dans la session HTTP
+            httpSession.setAttribute("currentSession", selectedSession);
+            return "redirect:/dashboard?id=" + id; // Redirige vers le tableau de bord
+        }
+
+        return "redirect:/home"; // Redirige vers la page d'accueil si la session n'est pas trouvée
     }
     @GetMapping("/dashboard")
     public String showDashboard(@RequestParam int id, Model model) {

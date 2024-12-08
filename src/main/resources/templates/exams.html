@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Examens</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .local-item {
+      background-color: #e6f7ff;
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+    td:hover {
+      background-color: #e6f7ff;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      width: 400px;
+      border-radius: 8px;
+    }
+    .modal-header {
+      font-size: 18px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .modal-footer {
+      text-align: right;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+    .delete-btn {
+      color: red;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    .exam-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .exam-list li {
+      margin: 5px 0;
+    }
+  </style>
+  <script>
+    function setExamDetails(cell) {
+      // Récupérer les valeurs des attributs data-* de la cellule cliquée
+      var date = cell.getAttribute('data-date');   // Récupère la date à partir de l'attribut data-date
+      var creneau = cell.getAttribute('data-creneau');  // Récupère le créneau à partir de l'attribut data-creneau
+
+      // Remplir les champs du formulaire avec les valeurs récupérées
+      document.getElementById("dateInput").value = date;
+      document.getElementById("heureInput").value = creneau;
+      document.getElementById('examListModal').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+
+      // Afficher dans la console pour vérifier
+      console.log("Date sélectionnée : " + date);
+      console.log("Créneau sélectionné : " + creneau);
+    }
+
+
+    function openAddExamModal() {
+      closeModal();
+      document.getElementById('addExamModal').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+
+      // Récupérer la liste des locaux depuis le serveur
+      fetch('/locaux')
+              .then(response => response.json())
+              .then(locaux => {
+                const localSelect = document.getElementById('local');
+                localSelect.innerHTML = '';
+
+                // Vérifier si la liste des locaux est vide
+                  locaux.forEach(local => {
+                    const option = document.createElement('option');
+                    option.value = local.idLocal;
+                    option.text = `${local.nom}`;
+                    localSelect.add(option);
+                  });
+              })
+              .catch(error => {
+                console.error('Erreur lors de la récupération des locaux :', error);
+              });
+    }
+    function updateSelectedLocaux() {
+      const localSelect = document.getElementById('local');
+      const selectedLocaux = Array.from(localSelect.selectedOptions).map(option => option.text);
+      const selectedLocauxContainer = document.getElementById('selectedLocaux');
+
+      // Effacer le conteneur pour tout reconstruire
+      selectedLocauxContainer.innerHTML = '';
+
+      // Ajouter chaque local sélectionné comme un bloc
+      selectedLocaux.forEach(local => {
+        const div = document.createElement('div');
+        div.textContent = local;
+        div.className = 'local-item'; // Classe pour styliser les blocs
+        selectedLocauxContainer.appendChild(div);
+      });
+    }
+
+
+    function closeModal() {
+      document.getElementById('examListModal').style.display = 'none';
+      document.getElementById('addExamModal').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+  </script>
+</head>
+<body>
+
+<h1>Emploi du Temps des Examens - Session <span th:text="${session.type}"></span></h1>
+
+<table>
+  <thead>
+  <tr>
+    <th>Jours</th>
+    <th th:each="creneau : ${creneaux}" th:text="${creneau}"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="date : ${dates}">
+    <td th:text="${date}"></td>
+    <td th:each="creneau : ${creneaux}"
+        th:data-date="${date}"
+    th:data-creneau="${creneau}"
+    onclick="setExamDetails(this)">
+    <button th:if="${exams != null && #lists.isEmpty(#lists.filter(exams, 'dateExamen == date and heureExamen == creneau'))}">
+      Ajouter Exam
+    </button>
+    </td>
+  </tr>
+  </tbody>
+</table>
+
+
+
+
+
+<!-- Fenêtre modale pour afficher les examens -->
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="examListModal">
+  <div class="modal-header">Examens programmés</div>
+  <ul class="exam-list" id="examList"></ul>
+  <div class="modal-footer">
+    <button class="button" onclick="openAddExamModal()">Ajouter un Examen</button>
+    <button class="button" onclick="closeModal()">Fermer</button>
+  </div>
+</div>
+
+<!-- Fenêtre modale pour ajouter un examen -->
+<div class="modal" id="addExamModal">
+  <div class="modal-header">Ajouter un Examen</div>
+  <form action="/addExam" method="POST" id="examForm">
+    <label for="dateInput"></label><input type="text" id="dateInput" name="dateExamen" readonly />
+    <label for="heureInput"></label><input type="text" id="heureInput" name="heureExamen" readonly />
+    <label for="responsableModule">Responsable du Module:</label><br>
+    <input type="text" id="responsableModule" name="responsableModule" required><br><br>
+
+    <label for="option">Option:</label><br>
+    <input type="text" id="option" name="option" required><br><br>
+
+    <label for="module">Module:</label><br>
+    <input type="text" id="module" name="module" required><br><br>
+
+    <label for="etudiants">Nombre d'étudiants inscrits:</label><br>
+    <input type="number" id="etudiants" name="nombreEtudiants" required><br><br>
+
+
+
+    <label for="local">Locaux d'examen:</label><br>
+    <select id="local" name="local" multiple onchange="updateSelectedLocaux()">
+      <option th:if="${#lists.isEmpty(locaux)}" value="">Aucun local disponible</option>
+      <option th:each="local : ${locaux}" th:value="${local.idLocal}" th:text="${local.nom}"></option>
+    </select><br><br>
+
+    <!-- Conteneur pour afficher les locaux sélectionnés -->
+    <div id="selectedLocauxContainer">
+      <label>Locaux sélectionnés :</label>
+      <div id="selectedLocaux" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+    </div>
+    <input type="hidden" id="locauxExamenIds" name="locauxExamenIds" />
+
+    <input type="hidden" name="sessionId" value="${session.idSession}" />
+
+    <div class="modal-footer">
+      <button type="submit" class="button">Créer</button>
+      <button type="button" class="button" onclick="closeModal()">Fermer</button>
+    </div>
+  </form>
+</div>
+
+
+
+
+
+</body>
+</html>
