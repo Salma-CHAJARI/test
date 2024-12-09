@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class ExamController {
@@ -43,7 +41,7 @@ public class ExamController {
         Session session = sessionService.getSessionById(sessionId);
         List<Local> locaux = localService.getAllLocaux();
         model.addAttribute("locaux", locaux);
-        model.addAttribute("session", session);
+        model.addAttribute("csession", session);
         if (session == null) {
             model.addAttribute("errorMessage", "Session not found");
             return "error";
@@ -63,7 +61,6 @@ public class ExamController {
                 return "error";
             }
 
-            model.addAttribute("session", session);
             model.addAttribute("dates", dates);
             model.addAttribute("creneaux", creneaux);
             System.out.println("Dates: " + dates);
@@ -82,20 +79,42 @@ public class ExamController {
                           @RequestParam String option,
                           @RequestParam String responsableModule,
                           @RequestParam int nombreEtudiants,
-                          @RequestParam List<Integer> locauxExamenIds,
-                          @RequestParam(required = false) Integer sessionId,  // Use Integer to handle possible null values
+                          @RequestParam String locauxExamenIds,  // Changer le type en String
+                          @RequestParam(required = false) Integer sessionId,
                           Model model) {
-        // Ensure that sessionId is correctly mapped as an integer
-        Session session = sessionService.getSessionById(sessionId);
+
+        // Validation de sessionId
         if (sessionId == null) {
             model.addAttribute("errorMessage", "Session ID is missing");
             return "error";
         }
 
-        // Récupérer les locaux associés aux IDs donnés
-        List<Local> locaux = localService.getLocauxByIds(locauxExamenIds);
+        // Récupération de la session
+        Session session = sessionService.getSessionById(sessionId);
+        if (session == null) {
+            model.addAttribute("errorMessage", "Session not found for ID: " + sessionId);
+            return "error";
+        }
 
-        // Créer un nouvel objet Examen
+        // Transformation et validation des IDs des locaux
+        List<Integer> ids;
+        try {
+            ids = Arrays.stream(locauxExamenIds.replaceAll("[\\[\\]]", "").split(","))
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            model.addAttribute("errorMessage", "Invalid locauxExamenIds format");
+            return "error";
+        }
+
+        // Récupération des locaux
+        List<Local> locaux = localService.getLocauxByIds(ids);
+        if (locaux == null || locaux.isEmpty()) {
+            model.addAttribute("errorMessage", "No valid locaux found for provided IDs");
+            return "error";
+        }
+
+        // Création de l'objet Exam
         Exam exam = new Exam();
         exam.setDateExamen(dateExamen);
         exam.setHeureExamen(heureExamen);
@@ -103,16 +122,21 @@ public class ExamController {
         exam.setOption(option);
         exam.setResponsableModule(responsableModule);
         exam.setNombreEtudiants(nombreEtudiants);
-        exam.setLocaux(locaux);  // Associer les locaux à l'examen
-        exam.setSession(session); // Associer la session
+        System.out.println("locaux: " + locaux);
+        exam.setLocaux(locaux);
+        exam.setSession(session);
 
-        // Sauvegarder l'examen dans la base de données
-        examService.creerExam(exam);
+        // Sauvegarde dans la base de données
+        try {
+            examService.creerExam(exam);
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Failed to save exam: " + e.getMessage());
+            return "error";
+        }
 
-        // Rediriger vers la page des examens
-        return "redirect:/exams";
+        // Redirection en cas de succès
+        return "redirect:/exam/" + sessionId;
     }
-
 
 
     @GetMapping("/deleteExam/{id}")

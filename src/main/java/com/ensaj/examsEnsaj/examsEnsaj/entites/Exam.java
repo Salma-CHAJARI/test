@@ -22,9 +22,6 @@ public class Exam {
     @Column(name = "heure_examen")
     private String heureExamen;
 
-    @Column(name = "locaux_examen")
-    private String locauxExamen;
-
     @Column(name = "module")
     private String module;
 
@@ -40,7 +37,7 @@ public class Exam {
     @JoinColumn(name = "id_session")
     private Session session;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Local> locals;
 
     // Méthode pour définir les locaux d'examen

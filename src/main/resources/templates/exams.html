@@ -160,7 +160,7 @@
 </head>
 <body>
 
-<h1>Emploi du Temps des Examens - Session <span th:text="${session.type}"></span></h1>
+<h1>Emploi du Temps des Examens - Session <span th:text="${csession.type}"></span></h1>
 
 <table>
   <thead>
@@ -220,7 +220,7 @@
 
 
     <label for="local">Locaux d'examen:</label><br>
-    <select id="local" name="local" multiple onchange="updateSelectedLocaux()">
+    <select id="local" name="locauxExamenIds" multiple onchange="updateSelectedLocaux()">
       <option th:if="${#lists.isEmpty(locaux)}" value="">Aucun local disponible</option>
       <option th:each="local : ${locaux}" th:value="${local.idLocal}" th:text="${local.nom}"></option>
     </select><br><br>
@@ -230,9 +230,9 @@
       <label>Locaux sélectionnés :</label>
       <div id="selectedLocaux" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
     </div>
-    <input type="hidden" id="locauxExamenIds" name="locauxExamenIds" />
 
-    <input type="hidden" name="sessionId" value="${session.idSession}" />
+
+    <input type="hidden" name="sessionId" th:value="${csession.idSession}" />
 
     <div class="modal-footer">
       <button type="submit" class="button">Créer</button>
